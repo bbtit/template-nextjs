@@ -8,7 +8,7 @@
 - Docker
 - ESLint
 - Prettier
-- Husky.
+- Husky
 
 # Get started
 
