@@ -1,27 +1,79 @@
-# Next.js + Tailwind CSS Example
+# My Next.js Template
 
-This example shows how to use [Tailwind CSS](https://tailwindcss.com/) [(v3.2)](https://tailwindcss.com/blog/tailwindcss-v3-2) with Next.js. It follows the steps outlined in the official [Tailwind docs](https://tailwindcss.com/docs/guides/nextjs).
+- Next.js
+- TypeScript
+- TailwindCSS
+- Prisma
+- Postgresql
+- Docker
+- ESLint
+- Prettier
+- Husky.
 
-## Deploy your own
+# Get started
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=next-example) or preview live with [StackBlitz](https://stackblitz.com/github/vercel/next.js/tree/canary/examples/with-tailwindcss)
+1. コンテナを立ち上げ
+   ```zsh
+   $ docker-compose up
+   ```
+1. コンテナの確認
+   ```zsh
+   $ docker ps
+   ```
+1. コンテナの中に入る
+   ```zsh
+   $ docker container exec -it postgres bash
+   ```
+1. コンテナ内にログインしデータベース一覧を確認
+   ```zsh
+   $ psql -l
+   ```
+1. `prisma/schema.prisma`にモデルを追加
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/git/external?repository-url=https://github.com/vercel/next.js/tree/canary/examples/with-tailwindcss&project-name=with-tailwindcss&repository-name=with-tailwindcss)
+1. `.env`に`DATABASE_URL`を記述
+   ```zsh
+   DATABASE_URL="postgresql://POSTGRES_USER:POSTGRES_PASSWORD@HOST:PORT/POSTGRES_DB
+   ```
+   ```zsh
+   DATABASE_URL="postgresql://root:secret@localhost:5432/mydb"
+   ```
+1. マイグレーションの実行
+   ```zsh
+   $ npx prisma migrate dev --name init
+   ```
+1. postgres コンテナ内でデータベースの選択とテーブル一覧取得
+   ```zsh
+   $ docker container exec -it postgres bash
+   $ psql -d mydb
+   $ \dt;
+   ```
+1. Prisma Studio を開く
+   ```zsh
+   $ npx prisma studio
+   ```
+1. ファイルを作成しデータベースクライアントを作成
 
-## How to use
+   ```zsh
+   $ mkdir lib
+   $ touch lib/prisma.ts
+   ```
 
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init), [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/), or [pnpm](https://pnpm.io) to bootstrap the example:
+   ```ts twoslash
+   import { PrismaClient } from '@prisma/client';
 
-```bash
-npx create-next-app --example with-tailwindcss with-tailwindcss-app
-```
+   let prisma: PrismaClient;
 
-```bash
-yarn create next-app --example with-tailwindcss with-tailwindcss-app
-```
+   if (process.env.NODE_ENV === 'production') {
+     prisma = new PrismaClient();
+   } else {
+     const globalWithPrisma = global as typeof globalThis & {
+       prisma: PrismaClient;
+     };
+     if (!globalWithPrisma.prisma) {
+       globalWithPrisma.prisma = new PrismaClient();
+     }
+     prisma = globalWithPrisma.prisma;
+   }
 
-```bash
-pnpm create next-app --example with-tailwindcss with-tailwindcss-app
-```
-
-Deploy it to the cloud with [Vercel](https://vercel.com/new?utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
+   export default prisma;
+   ```
